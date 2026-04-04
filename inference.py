@@ -86,7 +86,8 @@ def get_action(code: str, task_type: str) -> tuple:
 
 
 async def run_task(task_type: str):
-    env = CodeReviewTemplateEnv(base_url="http://localhost:8000")
+    SERVER_URL = os.getenv("SERVER_URL", "http://localhost:7860")
+    env = CodeReviewTemplateEnv(base_url=SERVER_URL)
     rewards = []
     steps_taken = 0
 

@@ -1,7 +1,6 @@
 spec_version: 1
-name: code_review_template  
+name: code_review_template
 type: space
 runtime: fastapi
 app: server.app:app
-port: 8000
-
+port: 7860
