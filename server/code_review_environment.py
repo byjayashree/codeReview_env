@@ -49,26 +49,23 @@ TASKS = {
 
 
 def grade(action: dict, task: dict) -> float:
-    predicted_issues = action.get("issues", [])
-    true_issues = task["issues"]
+    predicted_issues = [i.lower() for i in action.get("issues", [])]
+    true_issues = [i.lower() for i in task["issues"]]
 
-    match_count = sum(1 for issue in predicted_issues if issue in true_issues)
+    match_count = sum(
+        1 for true in true_issues
+        if any(true in pred or pred in true for pred in predicted_issues)
+    )
     issue_score = match_count / len(true_issues) if true_issues else 0.0
 
-    predicted_quality = action.get("quality_score", 0)
-    quality_score = min(max(float(predicted_quality), 0.0), 1.0)
+    quality_score = min(max(float(action.get("quality_score", 0)), 0.0), 1.0)
 
     suggestion = action.get("suggestion", "").lower()
-    keywords = ["secure", "avoid", "fix", "improve", "use", "replace", "remove"]
+    keywords = ["secure", "avoid", "fix", "improve", "use", "replace", "remove",
+                "space", "indent", "format", "pep", "injection", "sensitive", "password"]
     suggestion_score = 1.0 if any(word in suggestion for word in keywords) else 0.0
 
-    final_score = (
-        0.5 * issue_score +
-        0.2 * quality_score +
-        0.3 * suggestion_score
-    )
-
-    return round(final_score, 2)
+    return round(0.5 * issue_score + 0.2 * quality_score + 0.3 * suggestion_score, 2)
 
 
 class CodeReviewTemplateEnvironment(Environment):
@@ -84,12 +81,13 @@ class CodeReviewTemplateEnvironment(Environment):
         self._current_task = None
         self._task_type = "easy"
 
-    def reset(self) -> CodeReviewTemplateObservation:
+    def reset(self, task_type: str = None, **kwargs) -> CodeReviewTemplateObservation:
         self._state = State(episode_id=str(uuid4()), step_count=0)
-
-        # cycle through difficulty levels
-        task_types = ["easy", "medium", "hard"]
-        self._task_type = task_types[self._state.step_count % 3]
+        if task_type:
+            self._task_type = task_type
+        else:
+            task_types = ["easy", "medium", "hard"]
+            self._task_type = random.choice(task_types)
         self._current_task = random.choice(TASKS[self._task_type])
 
         return CodeReviewTemplateObservation(

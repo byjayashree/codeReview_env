@@ -7,14 +7,14 @@ from openai import OpenAI
 from client import CodeReviewTemplateEnv
 from models import CodeReviewTemplateAction
 
-API_KEY = os.getenv("HF_TOKEN") or os.getenv("OPENAI_API_KEY", "dummy")
+HF_TOKEN = os.getenv("HF_TOKEN")
 API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
 BENCHMARK = "code_review_env"
 MAX_STEPS = 1
 SUCCESS_THRESHOLD = 0.5
 
-client = OpenAI(api_key=API_KEY, base_url=API_BASE_URL)
+client = OpenAI(api_key=HF_TOKEN, base_url=API_BASE_URL)
 
 TASKS = ["easy", "medium", "hard"]
 
@@ -86,7 +86,7 @@ def get_action(code: str, task_type: str) -> tuple:
 
 
 async def run_task(task_type: str):
-    SERVER_URL = os.getenv("SERVER_URL", "http://localhost:7860")
+    SERVER_URL = os.getenv("SERVER_URL", "https://byjayashree-code-review-env.hf.space")
     env = CodeReviewTemplateEnv(base_url=SERVER_URL)
     rewards = []
     steps_taken = 0
@@ -94,7 +94,7 @@ async def run_task(task_type: str):
     log_start(task=task_type, model=MODEL_NAME)
 
     try:
-        result = await env.reset()
+        result = await env.reset(task_type=task_type)
         code = result.observation.code
 
         for step in range(1, MAX_STEPS + 1):
