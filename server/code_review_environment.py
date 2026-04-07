@@ -28,11 +28,11 @@ TASKS = {
     "medium": [
         {
             "code": "for i in range(10): print(i)",
-            "issues": ["bad formatting", "one-line loop"],
+            "issues": ["bad formatting", "one-line loop", "one liner", "single line loop"],
         },
         {
             "code": "def foo(lst):\n    for i in range(len(lst)): print(lst[i])",
-            "issues": ["use enumerate", "one-line loop"],
+            "issues": ["use enumerate", "one-line loop", "one liner", "single line loop"],
         }
     ],
     "hard": [
@@ -47,6 +47,15 @@ TASKS = {
     ]
 }
 
+# Strictly within (0, 1) — never 0.0 or 1.0
+SCORE_MIN = 0.05
+SCORE_MAX = 0.95
+
+
+def clamp_strict(value: float) -> float:
+    """Clamp a value to strictly (0, 1) — never 0.0 or 1.0."""
+    return round(min(max(value, SCORE_MIN), SCORE_MAX), 2)
+
 
 def grade(action: dict, task: dict) -> float:
     predicted_issues = [i.lower() for i in action.get("issues", [])]
@@ -58,14 +67,21 @@ def grade(action: dict, task: dict) -> float:
     )
     issue_score = match_count / len(true_issues) if true_issues else 0.0
 
-    quality_score = min(max(float(action.get("quality_score", 0)), 0.0), 1.0)
+    # Clamp quality_score from agent to a safe range before using it
+    raw_quality = float(action.get("quality_score", 0.5))
+    quality_score = min(max(raw_quality, 0.05), 0.95)
 
     suggestion = action.get("suggestion", "").lower()
-    keywords = ["secure", "avoid", "fix", "improve", "use", "replace", "remove",
-                "space", "indent", "format", "pep", "injection", "sensitive", "password"]
+    keywords = [
+        "secure", "avoid", "fix", "improve", "use", "replace", "remove",
+        "space", "indent", "format", "pep", "injection", "sensitive", "password"
+    ]
     suggestion_score = 1.0 if any(word in suggestion for word in keywords) else 0.0
 
-    return round(0.5 * issue_score + 0.2 * quality_score + 0.3 * suggestion_score, 2)
+    raw_score = 0.5 * issue_score + 0.2 * quality_score + 0.3 * suggestion_score
+
+    # Guarantee score is strictly within (0, 1)
+    return clamp_strict(raw_score)
 
 
 class CodeReviewTemplateEnvironment(Environment):
