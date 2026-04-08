@@ -120,28 +120,25 @@ class CodeReviewTemplateEnvironment(Environment):
             reward=0.05,
         )
 
-    def step(self, action: CodeReviewTemplateAction) -> CodeReviewTemplateObservation:
-        self._state.step_count += 1
+def step(self, action: CodeReviewTemplateAction) -> CodeReviewTemplateObservation:
+    self._state.step_count += 1
+    score = grade(action.model_dump(), self._current_task)
+    # Nuclear clamp - absolutely cannot be 0.0 or 1.0
+    score = round(min(max(float(score), 0.05), 0.95), 4)
+    if score <= 0.0: score = 0.05
+    if score >= 1.0: score = 0.95
 
-        if self._current_task is None:
-            self._task_type = random.choice(["easy", "medium", "hard"])
-            self._current_task = random.choice(TASKS[self._task_type])
+    feedback = f"Issues matched: {action.issues}. Score: {score}"
 
-        score = grade(action.model_dump(), self._current_task)
-        score = max(min(score, 0.95), 0.05)
-
-        feedback = f"Issues matched: {action.issues}. Score: {score}"
-
-        return CodeReviewTemplateObservation(
-            code=self._current_task["code"],
-            task_type=self._task_type,
-            feedback=feedback,
-            score=score,
-            done=True,
-            reward=score,
-           # removing the below line for submission 9
-           # metadata={"step": self._state.step_count, "task_type": self._task_type},
-        )
+    return CodeReviewTemplateObservation(
+        code=self._current_task["code"],
+        task_type=self._task_type,
+        feedback=feedback,
+        score=score,
+        done=True,
+        reward=score,
+        metadata={"step": self._state.step_count, "task_type": self._task_type},
+    )
 
     @property
     def state(self) -> State:
