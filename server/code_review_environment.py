@@ -53,8 +53,12 @@ SCORE_MAX = 0.95
 
 
 def clamp_strict(value: float) -> float:
-    """Clamp a value to strictly (0, 1) — never 0.0 or 1.0."""
-    return round(min(max(value, SCORE_MIN), SCORE_MAX), 2)
+    value = min(max(value, SCORE_MIN), SCORE_MAX)
+    if value <= 0.0:
+        value = SCORE_MIN
+    if value >= 1.0:
+        value = SCORE_MAX
+    return round(value, 3)
 
 
 def grade(action: dict, task: dict) -> float:
@@ -65,7 +69,8 @@ def grade(action: dict, task: dict) -> float:
         1 for true in true_issues
         if any(true in pred or pred in true for pred in predicted_issues)
     )
-    issue_score = match_count / len(true_issues) if true_issues else 0.0
+    issue_score = match_count / len(true_issues) if true_issues else 0.1
+    issue_score = max(issue_score, 0.1)
 
     # Clamp quality_score from agent to a safe range before using it
     raw_quality = float(action.get("quality_score", 0.5))
@@ -76,7 +81,7 @@ def grade(action: dict, task: dict) -> float:
         "secure", "avoid", "fix", "improve", "use", "replace", "remove",
         "space", "indent", "format", "pep", "injection", "sensitive", "password"
     ]
-    suggestion_score = 1.0 if any(word in suggestion for word in keywords) else 0.0
+    suggestion_score = 0.9 if any(word in suggestion for word in keywords) else 0.1
 
     raw_score = 0.5 * issue_score + 0.2 * quality_score + 0.3 * suggestion_score
 
