@@ -124,7 +124,8 @@ async def run_task(task_type: str):
             action, error = get_action(code, task_type)
             result = await env.step(action)
 
-            reward = result.reward if result.reward is not None else 0.05
+            reward = result.reward if (result.reward is not None and result.reward > 0.0) else 0.05
+            reward = round(min(max(reward, 0.05), 0.95), 2)
             done = result.done
             rewards.append(reward)
             steps_taken = step

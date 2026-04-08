@@ -39,7 +39,6 @@ class CodeReviewTemplateEnv(
             score=score,
             done=payload.get("done", False),
             reward=reward,
-            metadata=obs_data.get("metadata", {}),
         )
 
         return StepResult(

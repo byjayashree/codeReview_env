@@ -76,7 +76,7 @@ def grade(action: dict, task: dict) -> float:
     raw_quality = float(action.get("quality_score", 0.5))
     quality_score = min(max(raw_quality, 0.05), 0.95)
 
-    suggestion = action.get("suggestion", "").lower()
+    suggestion = str(action.get("suggestion") or "").lower()
     keywords = [
         "secure", "avoid", "fix", "improve", "use", "replace", "remove",
         "space", "indent", "format", "pep", "injection", "sensitive", "password"
@@ -139,9 +139,7 @@ class CodeReviewTemplateEnvironment(Environment):
             score=score,
             done=True,
             reward=score,
-           # removing the below line for submission 9
-           # metadata={"step": self._state.step_count, "task_type": self._task_type},
-        )
+       )
 
     @property
     def state(self) -> State:
