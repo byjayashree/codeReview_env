@@ -20,4 +20,3 @@ class CodeReviewTemplateObservation(Observation):
     score: float = Field(default=0.05, description="Score strictly between 0 and 1")
     reward: float = Field(default=0.05, description="Reward strictly between 0 and 1")
     done: bool = Field(default=False, description="Whether the episode is complete")
-    metadata: dict = Field(default_factory=dict, description="Additional metadata")
