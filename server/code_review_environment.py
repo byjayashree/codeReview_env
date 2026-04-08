@@ -119,6 +119,7 @@ class CodeReviewTemplateEnvironment(Environment):
         self._state.step_count += 1
 
         score = grade(action.model_dump(), self._current_task)
+        score = max(min(score, 0.95), 0.05)
 
         feedback = f"Issues matched: {action.issues}. Score: {score}"
 

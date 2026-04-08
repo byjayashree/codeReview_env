@@ -1,4 +1,5 @@
 """Code Review Template Environment Client."""
+
 from typing import Dict
 from openenv.core import EnvClient
 from openenv.core.client_types import StepResult
@@ -22,18 +23,28 @@ class CodeReviewTemplateEnv(
 
     def _parse_result(self, payload: Dict) -> StepResult[CodeReviewTemplateObservation]:
         obs_data = payload.get("observation", {})
+
+        # 🔒 Clamp score strictly within (0,1)
+        raw_score = obs_data.get("score", 0.01)
+        score = max(min(raw_score, 0.95), 0.05)
+
+        # 🔒 Clamp reward strictly within (0,1)
+        raw_reward = payload.get("reward", 0.01)
+        reward = max(min(raw_reward, 0.95), 0.05)
+
         observation = CodeReviewTemplateObservation(
             code=obs_data.get("code", ""),
             task_type=obs_data.get("task_type", "easy"),
             feedback=obs_data.get("feedback", ""),
-            score=obs_data.get("score", 0.5),
+            score=score,
             done=payload.get("done", False),
-            reward=payload.get("reward", 0.5),
+            reward=reward,
             metadata=obs_data.get("metadata", {}),
         )
+
         return StepResult(
             observation=observation,
-            reward=payload.get("reward", 0.0),
+            reward=reward,
             done=payload.get("done", False),
         )
 
