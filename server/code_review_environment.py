@@ -110,9 +110,9 @@ class CodeReviewTemplateEnvironment(Environment):
             code=self._current_task["code"],
             task_type=self._task_type,
             feedback="",
-            score=0.0,
+            score=0.01,
             done=False,
-            reward=0.0,
+            reward=0.01,
         )
 
     def step(self, action: CodeReviewTemplateAction) -> CodeReviewTemplateObservation:
