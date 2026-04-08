@@ -38,12 +38,12 @@ class CodeReviewTemplateEnv(
             feedback=obs_data.get("feedback", ""),
             score=score,
             done=payload.get("done", False),
-            reward=reward,
+            reward=reward
         )
 
         return StepResult(
             observation=observation,
-            reward=reward,
+            reward=float(reward),
             done=payload.get("done", False),
         )
 

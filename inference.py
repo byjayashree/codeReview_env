@@ -122,16 +122,16 @@ async def run_task(task_type: str):
 
         for step in range(1, MAX_STEPS + 1):
             action, error = get_action(code, task_type)
+            action.quality_score = round(min(max(float(action.quality_score or 0.05), 0.05), 0.95), 2)
             result = await env.step(action)
-
-            reward = result.reward if (result.reward is not None and result.reward > 0.0) else 0.05
-            reward = round(min(max(reward, 0.05), 0.95), 2)
+            raw_reward = result.reward
+            reward = raw_reward if (raw_reward is not None and raw_reward > 0.0) else 0.05
+            reward = round(min(max(reward, 0.05), 0.95), 2)  # clamp FIRST
             done = result.done
             rewards.append(reward)
             steps_taken = step
-
             action_str = json.dumps(action.model_dump())
-            log_step(step=step, action=action_str, reward=reward, done=done, error=error)
+            log_step(step=step, action=action_str, reward=reward, done=done, error=error)  # log AFTER
 
             if done:
                 break
