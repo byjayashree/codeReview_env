@@ -26,9 +26,9 @@ class CodeReviewTemplateEnv(
             code=obs_data.get("code", ""),
             task_type=obs_data.get("task_type", "easy"),
             feedback=obs_data.get("feedback", ""),
-            score=obs_data.get("score", 0.0),
+            score=obs_data.get("score", 0.5),
             done=payload.get("done", False),
-            reward=payload.get("reward", 0.0),
+            reward=payload.get("reward", 0.5),
             metadata=obs_data.get("metadata", {}),
         )
         return StepResult(
