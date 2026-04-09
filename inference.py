@@ -143,7 +143,7 @@ async def run_task(task_type: str):
         print(f"[DEBUG] Task '{task_type}' error: {e}", flush=True)
         if not rewards:
             rewards = [0.05]
-         log_end(success=False, steps=steps_taken, rewards=rewards)
+        log_end(success=False, steps=steps_taken, rewards=rewards)
     finally:
         await env.close()
 
