@@ -118,6 +118,7 @@ class CodeReviewTemplateEnvironment(Environment):
             score=0.05,
             done=False,
             reward=0.05,
+            metadata={"reward": 0.05, "score": 0.05}
         )
 
     def step(self, action: CodeReviewTemplateAction) -> CodeReviewTemplateObservation:
@@ -139,6 +140,7 @@ class CodeReviewTemplateEnvironment(Environment):
             score=score,
             done=True,
             reward=score,
+            metadata={"step": self._state.step_count, "task_type": self._task_type, "reward": score},
        )
 
     @property
