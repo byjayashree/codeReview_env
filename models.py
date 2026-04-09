@@ -18,5 +18,4 @@ class CodeReviewTemplateObservation(Observation):
     task_type: str = Field(default="easy", description="Difficulty level: easy, medium, hard")
     feedback: str = Field(default="", description="Feedback on the agent's last action")
     score: float = Field(default=0.05, description="Score strictly between 0 and 1")
-    reward: float = Field(default=0.05, description="Reward strictly between 0 and 1")
-    done: bool = Field(default=False, description="Whether the episode is complete")
+  
