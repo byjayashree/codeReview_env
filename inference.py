@@ -50,9 +50,10 @@ def log_step(step: int, action: str, reward: float, done: bool, error: Optional[
     print(f"[STEP] step={step} action={action} reward={reward:.2f} done={done_val} error={error_val}", flush=True)
 
 
-def log_end(success: bool, steps: int, rewards: List[float]) -> None:
+def log_end(success: bool, steps: int, rewards: List[float], score: float) -> None:
     rewards_str = ",".join(f"{r:.2f}" for r in rewards)
-    print(f"[END] success={str(success).lower()} steps={steps} rewards={rewards_str}", flush=True)
+    score_str = f"{score:.3f}"
+    print(f"[END] success={str(success).lower()} steps={steps} score={score_str} rewards={rewards_str}", flush=True)
 
 
 def clamp_quality(score: float) -> float:
@@ -137,13 +138,15 @@ async def run_task(task_type: str):
                 break
 
         success = (sum(rewards) / len(rewards)) >= SUCCESS_THRESHOLD if rewards else False
-        log_end(success=success, steps=steps_taken, rewards=rewards)
+        score = round(sum(rewards) / len(rewards), 3) if rewards else 0.05
+        score = round(min(max(score, 0.05), 0.95), 3)  # clamp
+        log_end(success=success, steps=steps_taken, rewards=rewards, score=score)
 
     except Exception as e:
         print(f"[DEBUG] Task '{task_type}' error: {e}", flush=True)
         if not rewards:
             rewards = [0.05]
-        log_end(success=False, steps=steps_taken, rewards=rewards)
+        log_end(success=False, steps=steps_taken, rewards=rewards if rewards else [0.05], score=0.05)
     finally:
         await env.close()
 

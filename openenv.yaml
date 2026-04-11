@@ -4,3 +4,43 @@ type: space
 runtime: fastapi
 app: server.app:app
 port: 7860
+
+tasks:
+  - id: easy
+    description: "Review Python code for PEP8 and formatting issues"
+    grader:
+      type: llm
+      prompt_template: >
+        You are grading a code review agent. The agent reviewed this Python code:
+        {code}
+        The agent identified these issues: {issues}
+        The agent gave a quality score of: {quality_score}
+        The agent suggested: {suggestion}
+        Expected issues include: missing spaces around operators, indentation errors, PEP8 violations.
+        Return a score strictly between 0.01 and 0.99 based on how well the agent identified the real issues.
+
+  - id: medium
+    description: "Review Python code for style and efficiency issues"
+    grader:
+      type: llm
+      prompt_template: >
+        You are grading a code review agent. The agent reviewed this Python code:
+        {code}
+        The agent identified these issues: {issues}
+        The agent gave a quality score of: {quality_score}
+        The agent suggested: {suggestion}
+        Expected issues include: one-liner loops, missing enumerate(), poor readability.
+        Return a score strictly between 0.01 and 0.99 based on how well the agent identified the real issues.
+
+  - id: hard
+    description: "Review Python code for security vulnerabilities"
+    grader:
+      type: llm
+      prompt_template: >
+        You are grading a code review agent. The agent reviewed this Python code:
+        {code}
+        The agent identified these issues: {issues}
+        The agent gave a quality score of: {quality_score}
+        The agent suggested: {suggestion}
+        Expected issues include: command injection, exposing sensitive data, unsafe input handling.
+        Return a score strictly between 0.01 and 0.99 based on how well the agent identified the real issues.
