@@ -11,7 +11,7 @@ HF_TOKEN = os.getenv("HF_TOKEN")
 API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
 BENCHMARK = "code_review_env"
-MAX_STEPS = 1
+MAX_STEPS = 2
 SUCCESS_THRESHOLD = 0.5
 
 client = OpenAI(api_key=HF_TOKEN, base_url=API_BASE_URL)
