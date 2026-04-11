@@ -85,7 +85,10 @@ def grade(action: dict, task: dict, task_type: str = "easy") -> float:
     }
 
     keywords = keyword_sets.get(task_type, keyword_sets["easy"])
-    suggestion_score = 0.9 if any(word in suggestion for word in keywords) else 0.1
+    if task_type == "hard":
+        suggestion_score = 0.7 if any(word in suggestion for word in keywords) else 0.1
+    else:
+        suggestion_score = 0.9 if any(word in suggestion for word in keywords) else 0.1
 
     # SAFE WEIGHTING (not too aggressive)
     if task_type == "easy":
@@ -93,7 +96,7 @@ def grade(action: dict, task: dict, task_type: str = "easy") -> float:
     elif task_type == "medium":
         issue_weight = 0.45
     else:  # hard
-        issue_weight = 0.30
+        issue_weight = 0.25
 
     raw_score = (
         issue_weight * issue_score +
