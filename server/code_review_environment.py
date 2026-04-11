@@ -36,14 +36,14 @@ TASKS = {
         }
     ],
     "hard": [
-        {
-            "code": "password = input()\nprint(password)",
-            "issues": ["security risk", "exposing sensitive data"],
-        },
-        {
-            "code": "import os\ncmd = input()\nos.system(cmd)",
-            "issues": ["command injection", "security risk"],
-        }
+       {
+           "code": "password = input()\nprint(password)",
+           "issues": ["security risk", "exposing sensitive data", "sensitive", "password", "plaintext"],
+       },
+       {
+           "code": "import os\ncmd = input()\nos.system(cmd)",
+           "issues": ["command injection", "security risk", "injection", "os.system", "unsafe input"],
+       }
     ]
 }
 
@@ -61,7 +61,7 @@ def clamp_strict(value: float) -> float:
     return round(value, 3)
 
 
-def grade(action: dict, task: dict) -> float:
+def grade(action: dict, task: dict, task_type: str = "easy") -> float:
     predicted_issues = [i.lower() for i in action.get("issues", [])]
     true_issues = [i.lower() for i in task["issues"]]
 
@@ -72,20 +72,26 @@ def grade(action: dict, task: dict) -> float:
     issue_score = match_count / len(true_issues) if true_issues else 0.1
     issue_score = max(issue_score, 0.1)
 
-    # Clamp quality_score from agent to a safe range before using it
     raw_quality = float(action.get("quality_score", 0.5))
     quality_score = min(max(raw_quality, 0.05), 0.95)
 
     suggestion = str(action.get("suggestion") or "").lower()
-    keywords = [
-        "secure", "avoid", "fix", "improve", "use", "replace", "remove",
-        "space", "indent", "format", "pep", "injection", "sensitive", "password"
-    ]
+
+    # Difficulty-specific keywords — harder tasks need more specific language
+    keyword_sets = {
+        "easy": ["fix", "space", "indent", "format", "pep", "improve"],
+        "medium": ["enumerate", "loop", "readability", "refactor", "improve", "use"],
+        "hard": ["security", "injection", "sensitive", "password", "vulnerability", "unsafe", "avoid", "subprocess"],
+    }
+    keywords = keyword_sets.get(task_type, keyword_sets["easy"])
     suggestion_score = 0.9 if any(word in suggestion for word in keywords) else 0.1
 
-    raw_score = 0.5 * issue_score + 0.2 * quality_score + 0.3 * suggestion_score
+    # Difficulty multiplier — penalizes partial matches more on harder tasks
+    difficulty_weight = {"easy": 0.6, "medium": 0.5, "hard": 0.4}
+    issue_weight = difficulty_weight.get(task_type, 0.5)
 
-    # Guarantee score is strictly within (0, 1)
+    raw_score = issue_weight * issue_score + 0.2 * quality_score + (1 - issue_weight - 0.2) * suggestion_score
+
     return clamp_strict(raw_score)
 
 
@@ -128,7 +134,7 @@ class CodeReviewTemplateEnvironment(Environment):
             self._task_type = random.choice(["easy", "medium", "hard"])
             self._current_task = random.choice(TASKS[self._task_type])
 
-        score = grade(action.model_dump(), self._current_task)
+        score = grade(action.model_dump(), self._current_task, self._task_type)
         score = max(min(score, 0.95), 0.05)
 
         feedback = f"Issues matched: {action.issues}. Score: {score}"
