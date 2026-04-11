@@ -38,11 +38,11 @@ TASKS = {
     "hard": [
        {
            "code": "password = input()\nprint(password)",
-           "issues": ["security risk", "exposing sensitive data", "sensitive", "password", "plaintext"],
+           "issues": ["security risk", "exposing sensitive data",  "plaintext password", "sensitive input handling"],
        },
        {
            "code": "import os\ncmd = input()\nos.system(cmd)",
-           "issues": ["command injection", "security risk", "injection", "os.system", "unsafe input"],
+           "issues": ["command injection", "security risk", "os.system vulnerability", "unsafe input execution",],
        }
     ]
 }
@@ -69,6 +69,7 @@ def grade(action: dict, task: dict, task_type: str = "easy") -> float:
         1 for true in true_issues
         if any(true in pred or pred in true for pred in predicted_issues)
     )
+
     issue_score = match_count / len(true_issues) if true_issues else 0.1
     issue_score = max(issue_score, 0.1)
 
@@ -77,20 +78,28 @@ def grade(action: dict, task: dict, task_type: str = "easy") -> float:
 
     suggestion = str(action.get("suggestion") or "").lower()
 
-    # Difficulty-specific keywords — harder tasks need more specific language
     keyword_sets = {
-        "easy": ["fix", "space", "indent", "format", "pep", "improve"],
-        "medium": ["enumerate", "loop", "readability", "refactor", "improve", "use"],
-        "hard": ["security", "injection", "sensitive", "password", "vulnerability", "unsafe", "avoid", "subprocess"],
+        "easy": ["fix", "space", "indent", "format"],
+        "medium": ["enumerate", "loop", "readability", "refactor"],
+        "hard": ["security", "injection", "sensitive", "password", "unsafe", "avoid"]
     }
+
     keywords = keyword_sets.get(task_type, keyword_sets["easy"])
     suggestion_score = 0.9 if any(word in suggestion for word in keywords) else 0.1
 
-    # Difficulty multiplier — penalizes partial matches more on harder tasks
-    difficulty_weight = {"easy": 0.6, "medium": 0.5, "hard": 0.4}
-    issue_weight = difficulty_weight.get(task_type, 0.5)
+    # SAFE WEIGHTING (not too aggressive)
+    if task_type == "easy":
+        issue_weight = 0.5
+    elif task_type == "medium":
+        issue_weight = 0.45
+    else:  # hard
+        issue_weight = 0.30
 
-    raw_score = issue_weight * issue_score + 0.2 * quality_score + (1 - issue_weight - 0.2) * suggestion_score
+    raw_score = (
+        issue_weight * issue_score +
+        0.25 * quality_score +
+        (1 - issue_weight - 0.25) * suggestion_score
+    )
 
     return clamp_strict(raw_score)
 
