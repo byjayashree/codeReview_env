@@ -18,32 +18,58 @@ TASKS = {
     "easy": [
         {
             "code": "def add(a,b):\n return a+b",
-            "issues": ["missing space", "indentation"],
+            "issues": ["missing space after comma", "indentation error"],
         },
         {
             "code": "x=5\ny=10\nprint(x+y)",
             "issues": ["missing spaces around operator"],
+        },
+        {
+            "code": "def greet(name):\nprint('Hello ' + name)",
+            "issues": ["missing indentation"],
+        },
+        {
+            "code": "myList=[1,2,3]\nfor i in myList:\n    print(i)",
+            "issues": ["missing spaces around operator", "non-pep8 variable name"],
         }
     ],
+
     "medium": [
         {
             "code": "for i in range(10): print(i)",
-            "issues": ["bad formatting", "one-line loop", "one liner", "single line loop"],
+            "issues": ["one-line loop", "bad formatting"],
         },
         {
             "code": "def foo(lst):\n    for i in range(len(lst)): print(lst[i])",
-            "issues": ["use enumerate", "one-line loop", "one liner", "single line loop"],
+            "issues": ["use enumerate", "inefficient loop"],
+        },
+        {
+            "code": "result = []\nfor i in range(10):\n    if i % 2 == 0:\n        result.append(i)",
+            "issues": ["use list comprehension", "verbose loop"],
+        },
+        {
+            "code": "def get_values(d):\n    for k in d:\n        print(k, d[k])",
+            "issues": ["use items for dictionary iteration", "inefficient access"],
         }
     ],
+
     "hard": [
-       {
-           "code": "password = input()\nprint(password)",
-           "issues": ["security risk", "exposing sensitive data",  "plaintext password", "sensitive input handling"],
-       },
-       {
-           "code": "import os\ncmd = input()\nos.system(cmd)",
-           "issues": ["command injection", "security risk", "os.system vulnerability", "unsafe input execution",],
-       }
+        {
+            "code": "password = input()\nprint(password)",
+            "issues": ["exposing sensitive data", "security risk"],
+        },
+        {
+            "code": "import os\ncmd = input()\nos.system(cmd)",
+            "issues": ["command injection", "unsafe input execution"],
+        },
+        {
+            "code": "import pickle\ndata = pickle.loads(user_input)",
+            "issues": ["insecure deserialization", "unsafe pickle usage"],
+        },
+        {
+            "code": "query = 'SELECT * FROM users WHERE id = ' + user_id\ncursor.execute(query)",
+            "issues": ["sql injection", "unsafe query construction"],
+        }
     ]
 }
 
