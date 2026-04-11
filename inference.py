@@ -61,10 +61,13 @@ def clamp_quality(score: float) -> float:
     return round(min(max(float(score), 0.05), 0.95), 2)
 
 
-def get_action(code: str, task_type: str) -> tuple:
+def get_action(code: str, task_type: str, feedback: str = "") -> tuple:
     hint = TASK_HINTS.get(task_type, "")
-    prompt = f"Task difficulty: {task_type}\nHint: {hint}\n\nReview this Python code:\n\n{code}"
-
+    
+    if feedback:
+        prompt = f"Task difficulty: {task_type}\nHint: {hint}\n\nPrevious feedback: {feedback}\n\nImprove your previous review based on the feedback.\nFocus on identifying missed issues and refining suggestions.\n\nCode:\n{code}"
+    else:
+        prompt = f"Task difficulty: {task_type}\nHint: {hint}\n\nReview this Python code:\n\n{code}"
     try:
         response = client.chat.completions.create(
             model=MODEL_NAME,
@@ -121,10 +124,13 @@ async def run_task(task_type: str):
         result = await env.reset(task_type=task_type)
         code = result.observation.code
 
+        feedback = ""
+
         for step in range(1, MAX_STEPS + 1):
-            action, error = get_action(code, task_type)
+            action, error = get_action(code, task_type, feedback)
             action.quality_score = round(min(max(float(action.quality_score or 0.05), 0.05), 0.95), 2)
             result = await env.step(action)
+            feedback = result.observation.feedback  # carry feedback to next step
             raw_reward = result.reward
             reward = raw_reward if (raw_reward is not None and raw_reward > 0.0) else 0.05
             reward = round(min(max(reward, 0.05), 0.95), 2)  # clamp FIRST

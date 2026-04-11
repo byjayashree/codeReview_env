@@ -171,19 +171,31 @@ class CodeReviewTemplateEnvironment(Environment):
         self._state.step_count += 1
 
         if self._current_task is None:
-           self._task_type = random.choice(["easy", "medium", "hard"])
-           self._current_task = random.choice(TASKS[self._task_type])
+            self._task_type = random.choice(["easy", "medium", "hard"])
+            self._current_task = random.choice(TASKS[self._task_type])
 
         score = grade(action.model_dump(), self._current_task, self._task_type)
         score = max(min(score, 0.95), 0.05)
 
         done = self._state.step_count >= self.MAX_STEPS
 
-        if done:
-            feedback = f"Final review complete. Issues matched: {action.issues}. Final score: {score}"
+        if self._state.step_count == 1:
+            # Step 1: agent reviews code, gets feedback on what it missed
+            matched = [i for i in self._current_task["issues"]
+                      if any(i in pred or pred in i
+                      for pred in [x.lower() for x in action.issues])]
+            missed = [i for i in self._current_task["issues"] if i not in matched]
+            if missed:
+                feedback = f"Step 1 complete. Score: {score}. You missed these issues: {', '.join(missed)}. Review again more carefully."
+            else:
+                feedback = f"Step 1 complete. Score: {score}. Good identification. Now suggest a concrete fix."
+            # Step 1 gets partial credit only
+            score = round(score * 0.7, 3)
+            score = max(score, 0.05)
         else:
-            feedback = f"Step {self._state.step_count}: Partial review. Issues found: {action.issues}. Keep reviewing — look deeper."
-  
+            # Step 2: agent should do better with the feedback
+            feedback = f"Final review complete. Issues matched: {action.issues}. Final score: {score}"
+
         return CodeReviewTemplateObservation(
             code=self._current_task["code"],
             task_type=self._task_type,
