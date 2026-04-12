@@ -121,7 +121,7 @@ Validated with:
 
 - Easy → step1: ~0.41, step2: ~0.62
 - Medium → step1: ~0.32, step2: ~0.39
-- Hard → step1: ~0.37, step2: ~0.46
+- Hard → step1: ~0.37, step2: ~0.76
 
 The agent consistently improves performance from Step 1 to Step 2,
 demonstrating feedback-driven refinement.
