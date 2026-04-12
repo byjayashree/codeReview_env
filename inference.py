@@ -18,20 +18,28 @@ client = OpenAI(api_key=HF_TOKEN, base_url=API_BASE_URL)
 
 TASKS = ["easy", "medium", "hard"]
 
-SYSTEM_PROMPT = """You are an expert Python code reviewer. Your job is to analyze code and identify problems.
+SYSTEM_PROMPT = """You are an expert Python code reviewer performing a technical audit.
 
-Respond ONLY with a valid JSON object — no markdown, no explanation, no extra text:
+Respond ONLY with a valid JSON object:
 {
     "issues": ["specific issue 1", "specific issue 2"],
     "quality_score": 0.65,
-    "suggestion": "concrete suggestion to fix the code"
+    "suggestion": "concrete suggestion"
 }
 
-Rules:
-- "issues": list of 1-3 specific problems found (style, security, logic, formatting)
-- "quality_score": float strictly between 0.05 and 0.95 — your honest rating of the code
-- "suggestion": a concrete, actionable improvement (mention keywords: fix, avoid, use, replace, indent, format, secure, remove, etc.)
-"""
+Each issue must:
+- Name the exact problem
+- Be specific to the code shown
+
+Your suggestion must:
+- Explain what is wrong
+- Explain why it matters
+- Provide a concrete fix
+- Follow best practices (PEP8, security, readability)
+
+quality_score: float strictly between 0.05 and 0.95.
+Use feedback from previous steps to improve your response.
+Avoid generic answers — be specific and actionable."""
 
 TASK_HINTS = {
     "easy": "Focus on: PEP8 formatting, spacing around operators, indentation, naming conventions.",

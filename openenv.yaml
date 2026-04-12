@@ -11,36 +11,69 @@ tasks:
     grader:
       type: llm
       prompt_template: >
-        You are grading a code review agent. The agent reviewed this Python code:
-        {code}
+        You are evaluating a code review agent on an easy task.
+
         The agent identified these issues: {issues}
         The agent gave a quality score of: {quality_score}
         The agent suggested: {suggestion}
-        Expected issues include: missing spaces around operators, indentation errors, PEP8 violations.
-        Return a score strictly between 0.01 and 0.99 based on how well the agent identified the real issues.
+
+        Evaluate the agent based on:
+        1. Accuracy of identified issues
+        2. Relevance to PEP8 and formatting violations
+        3. Quality and actionability of suggestions
+        4. Alignment with best practices
+
+        Scoring guidelines:
+        - 0.80–0.95: Highly accurate, specific issues, strong actionable suggestions
+        - 0.50–0.79: Mostly correct but somewhat generic
+        - 0.05–0.49: Weak, vague, or incorrect analysis
+
+        Return ONLY a float strictly between 0.05 and 0.95.
 
   - id: medium
     description: "Review Python code for style and efficiency issues"
     grader:
       type: llm
       prompt_template: >
-        You are grading a code review agent. The agent reviewed this Python code:
-        {code}
+        You are evaluating a code review agent on a medium difficulty task.
+
         The agent identified these issues: {issues}
         The agent gave a quality score of: {quality_score}
         The agent suggested: {suggestion}
-        Expected issues include: one-liner loops, missing enumerate(), poor readability.
-        Return a score strictly between 0.01 and 0.99 based on how well the agent identified the real issues.
+
+        Evaluate the agent based on:
+        1. Accuracy of identified issues
+        2. Depth of reasoning about code structure and efficiency
+        3. Knowledge of Python built-ins like enumerate() and items()
+        4. Quality and actionability of suggestions
+
+        Scoring guidelines:
+        - 0.80–0.95: Deep reasoning, identifies structural issues, strong suggestions
+        - 0.50–0.79: Identifies some issues but misses structural problems
+        - 0.05–0.49: Only surface-level or incorrect analysis
+
+        Return ONLY a float strictly between 0.05 and 0.95.
 
   - id: hard
     description: "Review Python code for security vulnerabilities"
     grader:
       type: llm
       prompt_template: >
-        You are grading a code review agent. The agent reviewed this Python code:
-        {code}
+        You are evaluating a code review agent on a hard security task.
+
         The agent identified these issues: {issues}
         The agent gave a quality score of: {quality_score}
         The agent suggested: {suggestion}
-        Expected issues include: command injection, exposing sensitive data, unsafe input handling.
-        Return a score strictly between 0.01 and 0.99 based on how well the agent identified the real issues.
+
+        Evaluate the agent based on:
+        1. Accuracy of security vulnerability identification
+        2. Depth of security reasoning
+        3. Knowledge of injection attacks, sensitive data exposure, unsafe practices
+        4. Quality and specificity of security fixes suggested
+
+        Scoring guidelines:
+        - 0.80–0.95: Correctly identifies security vulnerabilities with specific fixes
+        - 0.50–0.79: Identifies some security issues but lacks depth
+        - 0.05–0.49: Misses security issues or provides generic analysis
+
+        Return ONLY a float strictly between 0.05 and 0.95.

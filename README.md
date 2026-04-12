@@ -12,7 +12,7 @@ pinned: false
 ## 🚀 Overview
 
 This project implements a real-world reinforcement learning environment
-for automated code review using the OpenEnv framework.
+for automated code review using the OpenEnv framework. This environment introduces a feedback-driven multi-step evaluation mechanism, enabling agents to iteratively improve their code reviews.
 
 The environment simulates how an AI agent evaluates Python code —
 detecting issues, scoring quality, and suggesting improvements.
@@ -42,6 +42,20 @@ code organization, not just style.
 Detect security vulnerabilities — exposed sensitive data,
 command injection risks. The agent needs to reason about
 real-world consequences of bad code.
+
+---
+
+## 🔁 Multi-Step Interaction
+
+Unlike standard single-step environments, this system evaluates agents over multiple steps.
+
+- Step 1:
+  The agent performs an initial code review and receives partial reward.
+
+- Step 2:
+  The agent receives feedback and improves its response.
+
+This models iterative reasoning, where the agent refines its understanding based on feedback — similar to real-world code review workflows.
 
 ---
 
@@ -105,15 +119,12 @@ Validated with:
 
 ## 📊 Baseline Results
 
-Baseline agent scores using deterministic fallback:
+- Easy → step1: ~0.41, step2: ~0.62
+- Medium → step1: ~0.32, step2: ~0.39
+- Hard → step1: ~0.37, step2: ~0.46
 
-- Easy → 0.96 
-- Medium → 0.42
-- Hard → 0.40
-
-The difficulty progression is intentional. Easy tasks are solvable
-with basic pattern matching. Medium and hard tasks require genuine
-reasoning about code structure and security vulnerabilities.
+The agent consistently improves performance from Step 1 to Step 2,
+demonstrating feedback-driven refinement.
 
 ---
 
@@ -170,9 +181,13 @@ sends actions for each task, and emits structured logs:
 
 ```
 [START] task=easy env=code_review_env model=Qwen/Qwen2.5-72B-Instruct
-[STEP] step=1 action={...} reward=0.96 done=true error=null
-[END] success=true steps=1 rewards=0.96
+[STEP] step=1 action={...} reward=0.41 done=false error=null
+[STEP] step=2 action={...} reward=0.62 done=true error=null
+[END] success=true steps=2 score=0.515 rewards=0.41,0.62
 ```
+In step 1, the agent performs an initial review and receives feedback.
+In step 2, the agent refines its response based on that feedback,
+leading to improved performance.
 
 The script uses an OpenAI-compatible client with graceful fallback.
 If the API is unavailable, a deterministic fallback agent ensures
